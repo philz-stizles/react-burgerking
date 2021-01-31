@@ -16,7 +16,7 @@ const Order = ({ ingredients, price }) => {
     return (
         <div className="Order">
             <p>Ingredients: {transformedIngredients }</p>
-            <p>Price: <strong>USD {price}</strong></p>
+            <p>Price: <strong>USD {price.toFixed(2)}</strong></p>
         </div>
     )
 }

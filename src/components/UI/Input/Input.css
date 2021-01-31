@@ -10,7 +10,7 @@
     margin-bottom: 8px;
 }
 
-.Input .input-element{
+.Input .input-element {
     outline: none;
     border: 1px solid #ccc; 
     background-color: #fff;
@@ -24,4 +24,9 @@
 .Input .input-element:focus{
     outline: none;
     background-color: #ccc;
+}
+
+.Input .input-element.invalid {
+    border: ipx solid crimson;
+    background-color: salmon;
 }

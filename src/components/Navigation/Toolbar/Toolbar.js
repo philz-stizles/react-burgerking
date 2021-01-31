@@ -3,7 +3,7 @@ import NavigationItems from '../NavigationItems/NavigationItems'
 import Logo from './../../Logo/Logo'
 import { ToolbarContainer } from './Toolbar.styles'
 
-const Toolbar = () => {
+const Toolbar = ({ isAuthenticated }) => {
     return (
         <ToolbarContainer>
             <div>MENU</div>
@@ -11,7 +11,7 @@ const Toolbar = () => {
                 <Logo />
             </div>
             <nav className="desktop-only">
-                <NavigationItems />
+                <NavigationItems isAuthenticated={isAuthenticated}/>
             </nav>
         </ToolbarContainer>
     )

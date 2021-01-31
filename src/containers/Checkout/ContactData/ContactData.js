@@ -1,57 +1,120 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import Button from '../../../components/UI/Button/Button'
 import Input from '../../../components/UI/Input/Input'
+import Spinner from '../../../components/UI/Spinner/Spinner'
+import { checkValidity } from '../../../utils/validation'
 import axios from './../../../api/axios-orders'
 import './ContactData.css'
 
-export default class ContactData extends Component {
+class ContactData extends Component {
     state = {
         orderForm: {
             name: { 
                 elementType: 'input',
                 elementConfig: { type: 'text', placeholder: 'Your Name'},
-                value: ''
+                value: '',
+                validations: { required: true },
+                valid: false,
+                touched: false
             },
             email: {
                 elementType: 'input',
                 elementConfig: { type: 'text', placeholder: 'Your Email'},
-                value: ''
+                value: '',
+                validations: { required: true },
+                valid: false,
+                touched: false
             },
             street: {
                 elementType: 'input',
                 elementConfig: { type: 'text', placeholder: 'Street'},
-                value: ''
+                value: '',
+                validations: { required: true },
+                valid: false,
+                touched: false
             },
             zipCode: {
                 elementType: 'input',
                 elementConfig: { type: 'text', placeholder: 'ZIP Code'},
-                value: ''
+                value: '',
+                validations: { required: true, minLength: 5, maxLength: 5 },
+                valid: false,
+                touched: false
             },
             country: {
                 elementType: 'input',
                 elementConfig: { type: 'text', placeholder: 'Country'},
-                value: ''
+                value: '',
+                validations: { required: true },
+                valid: false,
+                touched: false
             },
             deleveryMethod: {
                 elementType: 'select',
-                elementConfig: { type: 'text', placeholder: 'Country', options: [
+                elementConfig: { type: 'text', placeholder: 'Delivery Method', options: [
                     { value: 'fastest', name: 'Fastest'},
                     { value: 'cheapest', name: 'Cheapest'}
                 ]},
-                value: ''
+                value: 'cheapest',
+                validations: { required: true },
+                valid: false
             },
         },
+        formIsValid: false,
         loading: false
+    }
+
+    inputChangeHandler = (event) => {
+        console.log(event.target.name, event.target.value)
+        const { name, value} = event.target
+        const { orderForm } = this.state
+
+        const updatedOrderForm = {
+            ...orderForm
+        }
+
+        const updatedFormField = {
+            ...orderForm[name],
+            value,
+            valid: checkValidity(value, orderForm[name]['validations']),
+            touched: true
+        }
+
+        updatedOrderForm[name] = updatedFormField
+
+        let formIsValid = true
+        for(let field in updatedOrderForm) {
+            formIsValid = updatedOrderForm[field].valid && formIsValid
+        }
+
+        this.setState({
+            orderForm: updatedOrderForm,
+            formIsValid
+        }, () => console.log(this.state.orderForm))
     }
 
     orderHandler = (event) => {
         event.preventDefault()
         this.setState({loading: true})
+        const { ingredients, totalPrice, history } = this.props
+        const { orderForm } = this.state
+        const orderData = Object.keys(orderForm).reduce((accumulator, field) => {
+            accumulator[field] = orderForm[field]['value']
+            return accumulator
+        }, {})
 
-        axios.post('/orders.json', {})
+        const order = {
+            ingredients,
+            price: totalPrice,
+            orderData
+        }
+
+        axios.post('/orders.json', order)
             .then(response => {
                 console.log(response)
                 this.setState({loading: false, showModal: false})
+                history.push('/')
             })
             .catch(error => {
                 console.log(error)
@@ -60,18 +123,37 @@ export default class ContactData extends Component {
     }
 
     render() {
-        const { orderForm } = this.state
+        const { orderForm, loading, formIsValid } = this.state
+
+        let formOrSpinner = (<form onSubmit={this.orderHandler}>
+            {
+                Object.keys(orderForm).map((field, i) => {
+                    return <Input 
+                        key={i} 
+                        shouldValidate={orderForm[field].validations}
+                        {...orderForm[field]} 
+                        name={field} 
+                        changed={this.inputChangeHandler} />
+                })
+            }
+            <Button disabled={!formIsValid} btnType="Success">ORDER</Button>
+        </form>)
+
+        if(loading) {
+            formOrSpinner = <Spinner />
+        }
         return (
             <div className="ContactData">
                 <h4>Enter your contact data</h4>
-                <form>
-                    <Input inputtype="input" name="name" id="" placeholder="Your Name" type="text" value="" />
-                    <Input inputtype="input" name="email" id="" placeholder="Your Email" type="email" value="" />
-                    <Input inputtype="input" name="street" id="" placeholder="Street" type="text" value="" />
-                    <Input inputtype="input" name="postalCode" id="" placeholder="Postal code" type="text" value="" />
-                    <Button btnType="Success" >ORDER</Button>
-                </form>
+                {formOrSpinner}
             </div>
         )
     }
 }
+
+const mapStateToProps = ({ ingredients, totalPrice }) => ({
+    ingredients,
+    totalPrice
+})
+
+export default connect(mapStateToProps)(ContactData)

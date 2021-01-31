@@ -1,47 +1,17 @@
 import React, { Component } from 'react'
-import axios from './../../api/axios-orders'
 import Order from '../../components/Order/Order/Order'
-import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler'
 import Spinner from '../../components/UI/Spinner/Spinner'
+import { connect } from 'react-redux'
+import { fetchOrdersAsync } from '../../store/actions/order'
 
 class Orders extends Component {
-    state = {
-        orders: [],
-        loading: true
-    }
-
     componentDidMount() {
-        console.log('here')
-        axios.get('/orders.json')
-            .then(response => {
-                let flattenedData = []
-                console.log(response)
-                if(!response.data){
-                    console.log('No data', response.data)
-                } else {
-                    const data = response.data
-                    flattenedData = Object.keys(data)
-                        .map(key => {
-                            return {
-                                id: key,
-                                ...data[key]
-                            }
-                        })
-                    console.log(flattenedData)
-                }
-
-                this.setState({
-                    orders: flattenedData,
-                    loading: false
-                })
-            })
-            .catch(error => {
-                this.setState({loading: false})
-            })
+        const { onFetchOrders, token } = this.props
+        onFetchOrders(token)
     }
 
     render() {
-        const { orders, loading } = this.state
+        const { orders, loading } = this.props
 
         let ordersOrSpinner = <Spinner />
 
@@ -59,4 +29,17 @@ class Orders extends Component {
     }
 }
 
-export default Orders
+const mapStateToProps = ({ order: { orders, loading, error }, auth: { token } }) => ({
+    orders,
+    token,
+    loading,
+    error
+})
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onFetchOrders: (token) => dispatch(fetchOrdersAsync(token)),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Orders)

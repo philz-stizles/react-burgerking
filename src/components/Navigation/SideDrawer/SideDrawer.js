@@ -3,14 +3,14 @@ import Logo from '../../Logo/Logo'
 import NavigationItems from '../NavigationItems/NavigationItems'
 import { SideDrawerContainer } from './SideDrawer.styles'
 
-const SideDrawer = () => {
+const SideDrawer = ({ isAuthenticated }) => {
     return (
         <SideDrawerContainer>
             <div className="logo-wrapper">
                 <Logo />
             </div>
             <nav>
-                <NavigationItems />
+                <NavigationItems isAuthenticated={isAuthenticated}/>
             </nav>
         </SideDrawerContainer>
     )

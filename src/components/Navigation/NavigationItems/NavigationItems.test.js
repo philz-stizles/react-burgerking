@@ -15,7 +15,6 @@ describe('<NavigationItems />', () => {
     })
 
     it('should render three <NavigationItems /> if authenticated', () => {
-        // wrapper = shallow(<NavigationItems isAuthenticated />)
         wrapper.setProps({
             isAuthenticated: true
         })
