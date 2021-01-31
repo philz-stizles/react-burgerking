@@ -9,7 +9,7 @@ const controls = [
     { label: 'Meat', type: 'meat'}
 ]
 
-export const BuildControls = ({ onAddIngredient, onRemoveIngredient, disabledStates, totalPrice, purchasable, onShowModal}) => {
+export const BuildControls = ({ isAuthenticated, onAddIngredient, onRemoveIngredient, disabledStates, totalPrice, purchasable, onShowModal}) => {
     return (
         <div className="BuildControls">
             <p>Current Price: <strong>{totalPrice.toFixed(2)}</strong></p>
@@ -23,7 +23,7 @@ export const BuildControls = ({ onAddIngredient, onRemoveIngredient, disabledSta
                     />
                 })
             }
-            <button onClick={onShowModal} className="OrderButton" disabled={!purchasable}>ORDER NOW</button>
+            <button onClick={onShowModal} className="OrderButton" disabled={!purchasable}>{(isAuthenticated)? 'ORDER NOW' : 'SIGN UP TO ORDER'}</button>
         </div>
     )
 }

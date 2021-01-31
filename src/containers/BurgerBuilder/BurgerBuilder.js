@@ -9,11 +9,15 @@ import axios from '../../api/axios-orders'
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler'
 import { INGREDIENTS_ADD, INGREDIENTS_REMOVE } from '../../store/actions/actionTypes'
 import { connect } from 'react-redux'
-class BurgerBuilder extends Component {
+import { initIngredientsAsync } from '../../store/actions/burger'
+import { purchaseOrderInit } from '../../store/actions'
+export class BurgerBuilder extends Component {
     state = {
         showModal: false,
-        loading: false,
-        error: false
+    }
+
+    componentDidMount() {
+        this.props.onInitIngredients()
     }
 
     checkIsPurchasable = (ingredients) => {
@@ -41,13 +45,18 @@ class BurgerBuilder extends Component {
     }
 
     goToCheckout = () => {
-        this.props.history.push('/checkout')
+        const { isAuthenticated, purchaseOrderInit, history } = this.props
+        if(isAuthenticated) {
+            history.push('/auth')
+        }
+
+        purchaseOrderInit()
+        history.push('/checkout')
     }
 
     render() {
-        const { showModal, loading, error } = this.state
-        const { ingredients, totalPrice, onIngredientAdd, onIngredientRemove } = this.props
-        const purchasable = this.checkIsPurchasable(ingredients)
+        const { showModal } = this.state
+        const { isAuthenticated, ingredients, error, totalPrice, onIngredientAdd, onIngredientRemove } = this.props
 
         const disabledStates = {}
         for(let key in ingredients) {
@@ -58,10 +67,12 @@ class BurgerBuilder extends Component {
         let modalComponent = null
 
         if(ingredients) {
+            const purchasable = this.checkIsPurchasable(ingredients)
             burgerComponentsOrSpinner = (
                 <Auxi>
                     <Burger ingredients={ingredients}/>
                     <BuildControls 
+                        isAuthenticated={isAuthenticated}
                         purchasable={purchasable}
                         totalPrice={totalPrice}
                         onAddIngredient={onIngredientAdd} 
@@ -78,10 +89,6 @@ class BurgerBuilder extends Component {
                 orderContinue={this.goToCheckout}
                 totalPrice={totalPrice}
             />
-
-            if(loading) {
-                modalComponent = <Spinner />
-            }
         }
 
         return ( 
@@ -95,15 +102,22 @@ class BurgerBuilder extends Component {
     }
 }
 
-const mapStateToProps = ({ burger: { ingredients, totalPrice, purchasable } }) => ({
+const mapStateToProps = ({ 
+    burger: { ingredients, totalPrice, purchasable, error },
+    auth: { token }
+}) => ({
     ingredients,
     totalPrice,
-    purchasable
+    purchasable,
+    error,
+    isAuthenticated: token !== null
 })
 
 const mapDispatchToProps = dispatch => ({
     onIngredientAdd: (ingredientName) => dispatch({type: INGREDIENTS_ADD, payload: {ingredientName}}),
-    onIngredientRemove: (ingredientName) => dispatch({type: INGREDIENTS_REMOVE, payload: {ingredientName}})
+    onIngredientRemove: (ingredientName) => dispatch({type: INGREDIENTS_REMOVE, payload: {ingredientName}}),
+    onInitIngredients: () => dispatch(initIngredientsAsync()),
+    purchaseOrderInit: () => dispatch(purchaseOrderInit()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(BurgerBuilder, axios))

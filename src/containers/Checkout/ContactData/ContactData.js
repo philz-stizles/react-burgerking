@@ -5,7 +5,9 @@ import Input from '../../../components/UI/Input/Input'
 import Spinner from '../../../components/UI/Spinner/Spinner'
 import { checkValidity } from '../../../utils/validation'
 import axios from './../../../api/axios-orders'
+import { purchaseOrderAsync } from '../../../store/actions/order'
 import './ContactData.css'
+import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler'
 
 class ContactData extends Component {
     state = {
@@ -61,8 +63,7 @@ class ContactData extends Component {
                 valid: false
             },
         },
-        formIsValid: false,
-        loading: false
+        formIsValid: false
     }
 
     inputChangeHandler = (event) => {
@@ -97,33 +98,25 @@ class ContactData extends Component {
     orderHandler = (event) => {
         event.preventDefault()
         this.setState({loading: true})
-        const { ingredients, totalPrice, history } = this.props
+        const { ingredients, totalPrice, token } = this.props
         const { orderForm } = this.state
         const orderData = Object.keys(orderForm).reduce((accumulator, field) => {
             accumulator[field] = orderForm[field]['value']
             return accumulator
         }, {})
 
-        const order = {
+        const newOrder = {
             ingredients,
             price: totalPrice,
             orderData
         }
 
-        axios.post('/orders.json', order)
-            .then(response => {
-                console.log(response)
-                this.setState({loading: false, showModal: false})
-                history.push('/')
-            })
-            .catch(error => {
-                console.log(error)
-                this.setState({loading: false, showModal: false})
-            })
+        this.props.onPurchaseOrder(newOrder, token)
     }
 
     render() {
-        const { orderForm, loading, formIsValid } = this.state
+        const { orderForm, formIsValid } = this.state
+        const { loading } = this.props
 
         let formOrSpinner = (<form onSubmit={this.orderHandler}>
             {
@@ -151,9 +144,20 @@ class ContactData extends Component {
     }
 }
 
-const mapStateToProps = ({ ingredients, totalPrice }) => ({
+const mapStateToProps = ({ 
+    burger: { ingredients, totalPrice }, 
+    order: { loading},
+    auth: { token }
+}) => ({
     ingredients,
-    totalPrice
+    totalPrice,
+    loading,
+    token
 })
 
-export default connect(mapStateToProps)(ContactData)
+const mapDispatchToProps = dispatch => ({
+    onPurchaseOrder: (newOrder, token) => dispatch(purchaseOrderAsync(newOrder, token))
+})
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(ContactData, axios))

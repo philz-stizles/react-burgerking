@@ -10,10 +10,10 @@ const purchaseOrderStart = () => {
     }
 }
 
-const purchaseOrderSuccess = (orders) => {
+const purchaseOrderSuccess = (newOrder) => {
     return {
         type: ORDER_PURCHASE_SUCCESS,
-        payload: orders
+        payload: newOrder
     }
 }
 
@@ -24,28 +24,23 @@ const purchaseOrderFailure = (error) => {
     }
 }
 
+export const purchaseOrderInit = () => {
+    return {
+        type: ORDER_PURCHASE_INIT
+    }
+}
+
 export const purchaseOrderAsync = (orderData, token) => {
+    console.log(token, orderData)
     return dispatch => {
         dispatch(purchaseOrderStart())
         axios.post(`/orders.json?auth=${token}`, orderData)
             .then(response => {
-                let flattenedData = []
                 console.log(response)
-                if(!response.data){
-                    console.log('No data', response.data)
-                } else {
-                    const data = response.data
-                    flattenedData = Object.keys(data)
-                        .map(key => {
-                            return {
-                                id: key,
-                                ...data[key]
-                            }
-                        })
-                    console.log(flattenedData)
-                }
-
-                dispatch(purchaseOrderSuccess(flattenedData))
+                dispatch(purchaseOrderSuccess({
+                    ...orderData,
+                    id: response.data.name,
+                }))
             })
             .catch(error => {
                 console.log(error.message)

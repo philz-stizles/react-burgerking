@@ -6,12 +6,36 @@ import {
 const initialState = {
     orders: [],
     loading: false,
+    purchased: false,
     error: null
 }
 
 const reducer = (state = initialState, action) => {
     const { type, payload } = action
     switch(type) {
+        case ORDER_PURCHASE_START:
+            return {
+                ...state,
+                loading: true,
+            }
+        case ORDER_PURCHASE_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                purchased: true,
+                orders: state.orders.concat(payload)
+            }
+        case ORDER_PURCHASE_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: payload
+            }
+        case ORDER_PURCHASE_INIT:
+            return {
+                ...state,
+                purchased: false
+            }
         case ORDERS_FETCH_START:
             return {
                 ...state,
