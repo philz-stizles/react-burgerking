@@ -4,7 +4,8 @@ const initialState = {
     ingredients: null,
     totalPrice: 0,
     purchasable: 0,
-    error: null
+    error: null,
+    building: false
 }
 
 const INGREDIENT_PRICES = {
@@ -27,7 +28,8 @@ const reducer = (state = initialState, action) => {
                     ...ingredients,
                     [ingredientName]: state.ingredients[ingredientName] + 1
                 },
-                totalPrice: state.totalPrice + INGREDIENT_PRICES[ingredientName]
+                totalPrice: state.totalPrice + INGREDIENT_PRICES[ingredientName],
+                building: true
             }
         case INGREDIENTS_REMOVE:
             const currentValue = state.ingredients[payload.ingredientName]
@@ -37,7 +39,8 @@ const reducer = (state = initialState, action) => {
                     ...state.ingredients,
                     [payload.ingredientName]: (currentValue > 0) ? (currentValue - 1) : 0
                 },
-                totalPrice: state.totalPrice - INGREDIENT_PRICES[payload.ingredientName]
+                totalPrice: state.totalPrice - INGREDIENT_PRICES[payload.ingredientName],
+                building: true
             }
         case INGREDIENTS_FETCH_SUCCESS:
             return {
@@ -49,7 +52,8 @@ const reducer = (state = initialState, action) => {
                     meat: payload.meat
                 },
                 totalPrice: 0,
-                error: null
+                error: null,
+                building: false
             }
         case INGREDIENTS_FETCH_FAILURE:
             return {

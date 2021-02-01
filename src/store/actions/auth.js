@@ -1,4 +1,4 @@
-import { AUTH_START, AUTH_SUCCESS, AUTH_FAILURE, AUTH_LOGOUT } from './actionTypes'
+import { AUTH_START, AUTH_SUCCESS, AUTH_FAILURE, AUTH_LOGOUT, AUTH_SET_REDIRECT_PATH } from './actionTypes'
 import axios from 'axios'
 
 const baseUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:'
@@ -101,5 +101,12 @@ export const authCheckState = () => {
                 dispatch(logout())
             }
         }
+    }
+}
+
+export const setAuthRedirectPath = (path) => {
+    return {
+        type: AUTH_SET_REDIRECT_PATH,
+        payload: path
     }
 }

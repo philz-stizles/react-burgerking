@@ -10,7 +10,7 @@ import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler'
 import { INGREDIENTS_ADD, INGREDIENTS_REMOVE } from '../../store/actions/actionTypes'
 import { connect } from 'react-redux'
 import { initIngredientsAsync } from '../../store/actions/burger'
-import { purchaseOrderInit } from '../../store/actions'
+import { purchaseOrderInit, setAuthRedirectPath } from '../../store/actions'
 export class BurgerBuilder extends Component {
     state = {
         showModal: false,
@@ -27,10 +27,15 @@ export class BurgerBuilder extends Component {
         ) <= 0) ? false : true
     }
 
-    toggleModal = () => {
-        this.setState({
-            showModal: !this.state.showModal
-        })
+    purchaseOrderHandler = () => {
+        const { isAuthenticated, history, onSetAuthRedirectPath } = this.props
+
+        if (isAuthenticated) {
+            this.setState({ showModal: !this.state.showModal })
+        } else {
+            onSetAuthRedirectPath('/checkout');
+            history.push('/auth');
+        }
     }
 
     closeModal = () => {
@@ -45,10 +50,7 @@ export class BurgerBuilder extends Component {
     }
 
     goToCheckout = () => {
-        const { isAuthenticated, purchaseOrderInit, history } = this.props
-        if(isAuthenticated) {
-            history.push('/auth')
-        }
+        const { purchaseOrderInit, history } = this.props
 
         purchaseOrderInit()
         history.push('/checkout')
@@ -78,7 +80,7 @@ export class BurgerBuilder extends Component {
                         onAddIngredient={onIngredientAdd} 
                         onRemoveIngredient={onIngredientRemove}
                         disabledStates={disabledStates}
-                        onShowModal={this.toggleModal}
+                        onPurchaseOrder={this.purchaseOrderHandler}
                     />
                 </Auxi>
             )
@@ -118,6 +120,7 @@ const mapDispatchToProps = dispatch => ({
     onIngredientRemove: (ingredientName) => dispatch({type: INGREDIENTS_REMOVE, payload: {ingredientName}}),
     onInitIngredients: () => dispatch(initIngredientsAsync()),
     purchaseOrderInit: () => dispatch(purchaseOrderInit()),
+    onSetAuthRedirectPath: (path) => dispatch(setAuthRedirectPath(path))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(BurgerBuilder, axios))

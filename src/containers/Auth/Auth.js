@@ -4,7 +4,7 @@ import { Redirect } from 'react-router-dom'
 import Button from '../../components/UI/Button/Button'
 import Input from '../../components/UI/Input/Input'
 import Spinner from '../../components/UI/Spinner/Spinner'
-import { authenticateAsync } from '../../store/actions/auth'
+import { authenticateAsync, setAuthRedirectPath } from '../../store/actions/auth'
 import { checkValidity } from './../../utils/validation'
 import './Auth.css'
 
@@ -30,6 +30,13 @@ class Auth extends Component {
             }
         },
         formIsValid: false,
+    }
+
+    componentDidMount() {
+        const { building, authRedirectPath, onSetAuthRedirectPath } = this.props
+        if(!building && authRedirectPath !== '/') {
+            onSetAuthRedirectPath()
+        }
     }
 
     inputChangeHandler = (event) => {
@@ -76,7 +83,7 @@ class Auth extends Component {
 
     render() {
         const { controls, formIsValid, isSignup } = this.state
-        const { loading, error, isAuthenticated } = this.props
+        const { loading, error, isAuthenticated, authRedirectPath } = this.props
 
         let errorMessage = null
         if(error) {
@@ -98,7 +105,7 @@ class Auth extends Component {
 
         let authRedirect = null
         if(isAuthenticated){
-            authRedirect = <Redirect to="/" />
+            authRedirect = <Redirect to={authRedirectPath} />
         }
 
         return (
@@ -115,15 +122,21 @@ class Auth extends Component {
     }
 }
 
-const mapStateToProps = ({ auth: { loading, error, token } }) => ({
+const mapStateToProps = ({ 
+    auth: { loading, error, token, authRedirectPath } ,
+    burger: { building }
+}) => ({
     loading,
     error,
-    isAuthenticated: token !== null
+    isAuthenticated: token !== null,
+    authRedirectPath,
+    building
 })
 
 const mapDispatchToProps = dispatch => {
     return {
         onAuth: (email, password, authMode) => dispatch(authenticateAsync(email, password, authMode)),
+        onSetAuthRedirectPath: () => dispatch(setAuthRedirectPath('/'))
     }
 }
 

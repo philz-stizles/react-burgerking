@@ -2,6 +2,6 @@ export { fetchOrdersAsync, purchaseOrderInit } from './order';
 export { 
     authenticateAsync,
     logout,
-    // setAuthRedirectPath,
+    setAuthRedirectPath,
     authCheckState
 } from './auth';
